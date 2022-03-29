@@ -33,13 +33,15 @@ class Check_Exceptions():
             if base == quote:
                 try:
                     raise APYException("Нельзя конвертировать одинаковые валюты!")
-                except APYException: 
+                except APYException:
+                    User.user_error(message)
                     bot.send_message(message.chat.id,"Нельзя конвертировать одинаковые валюты!")
             else:
                 if not amount.isdigit():
                     try:
                         raise APYException(f'Невозможно конвертировать "{amount}" количество валюты!')
-                    except APYException : 
+                    except APYException :
+                        User.user_error(message)
                         bot.send_message(message.chat.id,f'Невозможно конвертировать "{amount}" количество валюты!')
                 else:
                     return Request.get_request_for_price(base,quote,amount)
