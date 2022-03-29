@@ -1,0 +1,46 @@
+import requests
+import json
+from config import keys,TOKEN
+import telebot
+
+bot = telebot.TeleBot(TOKEN)
+
+class APYException(Exception):
+    pass
+class Request:
+    @staticmethod
+    def get_request_for_price(base,quote,amount):
+        data = requests.get(f"https://min-api.cryptocompare.com/data/price?fsym={base}&tsyms={quote}")
+        data = json.loads(data.content)
+        price = data[quote]
+        return price * int(amount)
+class User:
+    @staticmethod
+    def user_error(message):
+        bot.reply_to(message, "Ошибка пользователя")
+class Check_Exceptions():
+    @staticmethod
+    def exceptions_method(message):
+        text = message.text.split(' ')
+        base, quote, amount = text
+        try:
+            base,quote = keys[base],keys[quote]
+        except KeyError:
+            User.user_error(message)
+            bot.send_message(message.chat.id,"Недопустимая валюта! Посмотрите ещё раз на \n"
+                  "допустимые валюты : /values")
+        else:
+            if base == quote:
+                try:
+                    raise APYException("Нельзя конвертировать одинаковые валюты!")
+                except APYException: 
+                    bot.send_message(message.chat.id,"Нельзя конвертировать одинаковые валюты!")
+            else:
+                if not amount.isdigit():
+                    try:
+                        raise APYException(f'Невозможно конвертировать "{amount}" количество валюты!')
+                    except APYException : 
+                        bot.send_message(message.chat.id,f'Невозможно конвертировать "{amount}" количество валюты!')
+                else:
+                    return Request.get_request_for_price(base,quote,amount)
+
