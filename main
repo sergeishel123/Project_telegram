@@ -1,0 +1,41 @@
+from config import keys,TOKEN
+from extension import APYException,Check_Exceptions,bot
+
+
+
+
+@bot.message_handler(commands = ["start","help"])
+def help(message):
+    text = "Чтобы начать работу введите команду в следующем формате:\n" \
+           "<имя переводимой валюты> <в какую валюту перевести> "\
+           "<количество переводимой валюты>\n"\
+           "Увидеть список всех доступных валют:/values"
+    bot.reply_to(message,text)
+
+@bot.message_handler(commands = ["values"])
+def values(message):
+    text = "Доступные валюты"
+    for key in keys.keys():
+        text = '\n'.join((text,key))
+    bot.reply_to(message,text)
+
+
+@bot.message_handler(content_types = ["text"])
+def convert(message):
+    text = message.text.split(' ')
+    try:
+        currency1, currency2, quantity = text
+    except ValueError:
+        bot.reply_to(message, "Ошибка пользователя")
+        bot.send_message(message.chat.id,"Число элементов не равно 3! Обратите внимание на количество \n"
+                                         "пробелов(между элементами один пробел). Взгляните ещё раз \n"
+                                         "на правила написания: /help")
+
+    else:
+        total = Check_Exceptions.exceptions_method(message)
+        if total != None:
+            bot.send_message(message.chat.id,f"Цена {quantity} {currency1} в {currency2} - {total}")
+
+
+
+bot.polling(none_stop = True)
